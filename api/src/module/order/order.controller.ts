@@ -141,7 +141,7 @@ export class OrderController {
 
   @Post("upload-pdf")
   @UseInterceptors(FileInterceptor("file"))
-  @ApiOperation({ summary: "Upload PDF file" })
+  @ApiOperation({ summary: "WIP: Upload PDF file" })
   @ApiConsumes("multipart/form-data")
   @ApiBody({
     description: "PDF file to upload",
