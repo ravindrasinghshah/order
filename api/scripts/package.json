@@ -1,0 +1,12 @@
+{
+  "name": "order-api-scripts",
+  "version": "1.0.0",
+  "description": "Database setup scripts for Order API",
+  "scripts": {
+    "create-table": "node create-dynamodb-table.js",
+    "create-table:local": "DYNAMODB_ENDPOINT=http://localhost:8000 node create-dynamodb-table.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.699.0"
+  }
+}
