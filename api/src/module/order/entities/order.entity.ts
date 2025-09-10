@@ -79,4 +79,25 @@ export class Order {
     example: "2024-01-15T10:30:45.123Z",
   })
   updatedAt: string;
+
+  @ApiProperty({
+    description: "PDF file name",
+    example: "order-receipt-123.pdf",
+    required: false,
+  })
+  pdfFileName?: string;
+
+  @ApiProperty({
+    description: "PDF file path or URL",
+    example: "/uploads/orders/order-receipt-123.pdf",
+    required: false,
+  })
+  pdfFilePath?: string;
+
+  @ApiProperty({
+    description: "PDF file size in bytes",
+    example: 1024000,
+    required: false,
+  })
+  pdfFileSize?: number;
 }

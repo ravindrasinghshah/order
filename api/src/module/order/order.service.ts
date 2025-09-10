@@ -1,13 +1,28 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from "@nestjs/common";
 import { v4 as uuidv4 } from "uuid";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
 import { Order } from "./entities/order.entity";
 import { DynamoDBService } from "./services/dynamodb.service";
+import * as pdfParse from "pdf-parse";
+
+import * as Tesseract from "tesseract.js";
+import { ChatOpenAI } from "@langchain/openai";
+import { PromptTemplate } from "@langchain/core/prompts";
 
 @Injectable()
 export class OrderService {
-  constructor(private readonly dynamoDBService: DynamoDBService) {}
+  private model: ChatOpenAI;
+  constructor(private readonly dynamoDBService: DynamoDBService) {
+    this.model = new ChatOpenAI({
+      model: "gpt-4o-mini",
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
 
   async create(createOrderDto: CreateOrderDto): Promise<Order> {
     const orderId = uuidv4();
@@ -66,7 +81,46 @@ export class OrderService {
     await this.dynamoDBService.deleteOrder(id);
   }
 
-  getHello(): string {
-    return "Hello World from OrderService!";
+  async uploadPdf(file: any): Promise<string> {
+    let text = "";
+    // Validate file type
+    if (file.mimetype !== "application/pdf") {
+      throw new BadRequestException("Only PDF files are allowed");
+    }
+
+    // Step 1: try digital text
+    try {
+      const pdfData = await pdfParse(file.buffer);
+      text = pdfData.text.trim();
+    } catch {
+      console.warn("PDF parse failed, will try OCR...");
+    }
+
+    // Step 2: OCR fallback
+    if (!text) {
+      const {
+        data: { text: ocrText },
+      } = await Tesseract.recognize(file.buffer, "eng");
+      text = ocrText;
+    }
+
+    // Step 3: LangChain prompt
+    const prompt = PromptTemplate.fromTemplate(`
+  You are a medical document parser. 
+  Extract ONLY the following fields from the text:
+  - Patient Name
+  - Date of Birth (MM/DD/YYYY)
+
+  If not found, return null for that field.
+
+  Text:
+  {doc_text}
+`);
+
+    const chain = prompt.pipe(this.model);
+
+    const response = await chain.invoke({ doc_text: text });
+    //== TODO: parse the response to JSON using ZodSchema
+    return response.toString();
   }
 }

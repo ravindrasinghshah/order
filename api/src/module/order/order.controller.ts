@@ -8,7 +8,11 @@ import {
   Delete,
   ValidationPipe,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
 } from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
 import {
   ApiTags,
   ApiOperation,
@@ -16,6 +20,7 @@ import {
   ApiParam,
   ApiBody,
   ApiSecurity,
+  ApiConsumes,
 } from "@nestjs/swagger";
 import { OrderService } from "./order.service";
 import { CreateOrderDto } from "./dto/create-order.dto";
@@ -47,7 +52,7 @@ export class OrderController {
     description: "Unauthorized - Invalid or missing API key",
   })
   async create(
-    @Body(ValidationPipe) createOrderDto: CreateOrderDto,
+    @Body(ValidationPipe) createOrderDto: CreateOrderDto
   ): Promise<Order> {
     return await this.orderService.create(createOrderDto);
   }
@@ -110,7 +115,7 @@ export class OrderController {
   })
   async update(
     @Param("id") id: string,
-    @Body(ValidationPipe) updateOrderDto: UpdateOrderDto,
+    @Body(ValidationPipe) updateOrderDto: UpdateOrderDto
   ): Promise<Order> {
     return await this.orderService.update(id, updateOrderDto);
   }
@@ -132,6 +137,64 @@ export class OrderController {
   })
   async remove(@Param("id") id: string): Promise<void> {
     return await this.orderService.remove(id);
+  }
+
+  @Post("upload-pdf")
+  @UseInterceptors(FileInterceptor("file"))
+  @ApiOperation({ summary: "Upload PDF file" })
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({
+    description: "PDF file to upload",
+    type: "object",
+    schema: {
+      type: "object",
+      properties: {
+        file: {
+          type: "string",
+          format: "binary",
+          description: "PDF file to upload",
+        },
+      },
+      required: ["file"],
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: "File uploaded successfully",
+    schema: {
+      type: "object",
+      properties: {
+        success: { type: "boolean", example: true },
+        data: {
+          type: "object",
+          description: "Upload result data",
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: "Bad request - No file uploaded or invalid file",
+    schema: {
+      type: "object",
+      properties: {
+        error: { type: "string", example: "No file uploaded" },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  async uploadPdf(@UploadedFile() file: any) {
+    if (!file) {
+      return { error: "No file uploaded" };
+    }
+    const result = await this.orderService.uploadPdf(file);
+    return {
+      success: true,
+      data: result,
+    };
   }
 
   @Get("health/check")
