@@ -6,11 +6,11 @@ Backend: NestJS (TypeScript, REST API)
 
 Frontend: React (optional for MVP)
 
-Database: AWS RDS (PostgreSQL/MySQL, configurable)
+Database: AWS DynamoDB
 
 Storage: AWS S3 (for PDF uploads)
 
-Deployment: AWS (e.g., Elastic Beanstalk, EC2, Vercel for frontend, S3 static site, or Amplify)
+Deployment: AWS (EC2, S3 static site)
 
 ### Features
 
@@ -20,6 +20,6 @@ Upload PDF, extract patient details (name, DOB)
 
 Log all user actions in the database
 
-API authentication (JWT)
+API authentication (API Key header)
 
 Deployed/public endpoint
