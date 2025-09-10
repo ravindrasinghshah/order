@@ -1,9 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
-import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
-import { Order } from './entities/order.entity';
-import { DynamoDBService } from './services/dynamodb.service';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { v4 as uuidv4 } from "uuid";
+import { CreateOrderDto } from "./dto/create-order.dto";
+import { UpdateOrderDto } from "./dto/update-order.dto";
+import { Order } from "./entities/order.entity";
+import { DynamoDBService } from "./services/dynamodb.service";
 
 @Injectable()
 export class OrderService {
@@ -18,11 +18,11 @@ export class OrderService {
       sk: `ORDER#${orderId}`,
       ...createOrderDto,
       totalPrice: createOrderDto.quantity * createOrderDto.unitPrice,
-      status: createOrderDto.status || 'pending',
+      status: createOrderDto.status || "pending",
       createdAt: now,
       updatedAt: now,
     };
-    
+
     return await this.dynamoDBService.createOrder(order);
   }
 
@@ -67,6 +67,6 @@ export class OrderService {
   }
 
   getHello(): string {
-    return 'Hello World from OrderService!';
+    return "Hello World from OrderService!";
   }
 }

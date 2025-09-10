@@ -21,7 +21,7 @@ export class DynamoDBService {
     const region = this.configService.get<string>("aws.region") || "us-east-2";
     const accessKeyId = this.configService.get<string>("aws.accessKeyId");
     const secretAccessKey = this.configService.get<string>(
-      "aws.secretAccessKey"
+      "aws.secretAccessKey",
     );
     const endpoint = this.configService.get<string>("aws.dynamoDB.endpoint");
 
@@ -64,7 +64,7 @@ export class DynamoDBService {
         new PutCommand({
           TableName: this.tableName,
           Item: orderWithKeys,
-        })
+        }),
       );
 
       this.logger.log(`Order ${order.id} created successfully`);
@@ -89,7 +89,7 @@ export class DynamoDBService {
             pk: `ORDER#${id}`,
             sk: `ORDER#${id}`,
           },
-        })
+        }),
       );
 
       if (!result.Item) {
@@ -102,7 +102,7 @@ export class DynamoDBService {
     } catch (error) {
       this.logger.error(
         `Error getting order ${id}: ${error.message}`,
-        error.stack
+        error.stack,
       );
       throw error;
     }
@@ -121,7 +121,7 @@ export class DynamoDBService {
           ExpressionAttributeValues: {
             ":pk": "ORDER#",
           },
-        })
+        }),
       );
 
       return (result.Items || []).map((item) => {
@@ -131,7 +131,7 @@ export class DynamoDBService {
     } catch (error) {
       this.logger.error(
         `Error getting all orders: ${error.message}`,
-        error.stack
+        error.stack,
       );
       throw error;
     }
@@ -174,7 +174,7 @@ export class DynamoDBService {
           ExpressionAttributeNames: expressionAttributeNames,
           ExpressionAttributeValues: expressionAttributeValues,
           ReturnValues: "ALL_NEW",
-        })
+        }),
       );
 
       const { pk, sk, ...order } = result.Attributes as any;
@@ -183,7 +183,7 @@ export class DynamoDBService {
     } catch (error) {
       this.logger.error(
         `Error updating order ${id}: ${error.message}`,
-        error.stack
+        error.stack,
       );
       throw error;
     }
@@ -203,14 +203,14 @@ export class DynamoDBService {
             pk: `ORDER#${id}`,
             sk: `ORDER#${id}`,
           },
-        })
+        }),
       );
 
       this.logger.log(`Order ${id} deleted successfully`);
     } catch (error) {
       this.logger.error(
         `Error deleting order ${id}: ${error.message}`,
-        error.stack
+        error.stack,
       );
       throw error;
     }
@@ -220,7 +220,7 @@ export class DynamoDBService {
     // This method would be used to create the table if it doesn't exist
     // In production, you'd typically create tables via AWS CLI or CloudFormation
     this.logger.log(
-      "Table creation should be handled via AWS CLI or CloudFormation"
+      "Table creation should be handled via AWS CLI or CloudFormation",
     );
   }
 }
